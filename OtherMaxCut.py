@@ -196,7 +196,12 @@ if __name__ == "__main__":
         [0.0, 0.0, 1.5, 0.0],
     ], dtype=float)
 
-    val, x, (S, VS), meta = maxcut_goemans_williamson(W, R=128, rng=42)
+    mtlMatrix = np.load("mtlFile.npy")
+
+    #val, x, (S, VS), meta = maxcut_goemans_williamson(W, R=128, rng=42)
+
+    val, x, (S, VS), meta = maxcut_goemans_williamson(mtlMatrix, R=128, rng=42)
+
     print("Méthode:", meta["method"])
     print("Coupe (S | V\\S):", S, "|", VS)
     print("Valeur de la coupe:", val)

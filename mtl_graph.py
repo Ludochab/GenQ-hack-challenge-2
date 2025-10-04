@@ -139,3 +139,11 @@ for node in G_simplified.nodes():
     ).add_to(m)
 
 m.save("map.html")
+
+
+
+mtlMatrix = nx.to_numpy_array(G_simplified)
+
+
+np.save("mtlFile.npy", mtlMatrix)
+
