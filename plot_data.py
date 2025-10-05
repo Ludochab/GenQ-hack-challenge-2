@@ -21,7 +21,7 @@ plt.tight_layout()
 plt.show()
 
 # Load data
-with open("maxcut_vs_mis_cut_kings.json") as f:
+with open("maxcut_vs_mis_cut_kings_V2.json") as f:
     data = json.load(f)
 
 # Extract MaxCut data

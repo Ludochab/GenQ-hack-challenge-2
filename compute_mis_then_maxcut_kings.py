@@ -5,6 +5,7 @@ from OtherMaxCut import maxcut_goemans_williamson, maxcut_value_from_assignment
 import math
 import random
 import numpy as np
+from hybrid_max_cut import hybrid_max_cut, cut_value
 
 M = 4
 N = 4
@@ -16,6 +17,31 @@ P = 0.15
 SEED = None
 NUM_SAMPLES = 10000
 results = []
+
+# for i in range(NUM_SAMPLES):
+#     if i % 1000 == 0:
+#         print(f"Sample {i}/{NUM_SAMPLES}")
+#     G = king_graph(M, N)
+#     H = remove_random_nodes(G, mode=MODE, k=(K if MODE=="k" else None), p=(P if MODE=="p" else None), seed=SEED)
+#     add_random_edge_weights_sum(H, total=100.0, seed=SEED, integer=False, decimals=3)
+#     W = nx.to_numpy_array(H, weight="weight")
+    
+#     # 1. Compute true MaxCut value
+#     val_maxcut, x_maxcut, (S, VS), meta = maxcut_goemans_williamson(W, R=64, rng=None, verbose=False)
+    
+#     # 2. Compute MIS (using NetworkX's approximation)
+#     mis_nodes = nx.algorithms.approximation.maximum_independent_set(H)
+#     # Build assignment: +1 for MIS nodes, -1 for others
+#     node_list = list(H.nodes())
+#     x_mis = np.array([1.0 if node in mis_nodes else -1.0 for node in node_list])
+#     # 3. Compute MaxCut value for this assignment
+#     val_mis_cut = maxcut_value_from_assignment(W, x_mis)
+    
+#     results.append({
+#         "sample": i,
+#         "maxcut_value": val_maxcut,
+#         "mis_cut_value": val_mis_cut
+#     })
 
 for i in range(NUM_SAMPLES):
     if i % 1000 == 0:
@@ -30,16 +56,23 @@ for i in range(NUM_SAMPLES):
     
     # 2. Compute MIS (using NetworkX's approximation)
     mis_nodes = nx.algorithms.approximation.maximum_independent_set(H)
-    # Build assignment: +1 for MIS nodes, -1 for others
     node_list = list(H.nodes())
     x_mis = np.array([1.0 if node in mis_nodes else -1.0 for node in node_list])
+    
     # 3. Compute MaxCut value for this assignment
     val_mis_cut = maxcut_value_from_assignment(W, x_mis)
+    
+    # 4. Hybrid MaxCut improvement (using MIS assignment as starting point)
+    # Convert x_mis to bitstring: "1" for +1, "0" for -1
+    bs_mis = "".join("1" if v == 1.0 else "0" for v in x_mis)
+    S_hybrid = hybrid_max_cut(H, bs_mis, weight="weight", max_iter=100)
+    val_hybrid = cut_value(H, S_hybrid, weight="weight")
     
     results.append({
         "sample": i,
         "maxcut_value": val_maxcut,
-        "mis_cut_value": val_mis_cut
+        "mis_cut_value": val_mis_cut,
+        "hybrid_cut_value": val_hybrid
     })
 
 # Optionally, bin and save as before
@@ -60,7 +93,13 @@ def bin_counts(values, bin_size):
 binned_maxcut = bin_counts(cut_values, bin_size)
 binned_mis_cut = bin_counts(mis_cut_values, bin_size)
 
-with open("maxcut_vs_mis_cut_kings.json", "w") as f:
+# with open("maxcut_vs_mis_cut_kings.json", "w") as f:
+#     json.dump({
+#         "maxcut": binned_maxcut,
+#         "mis_cut": binned_mis_cut
+#     }, f, indent=2)
+
+with open("maxcut_vs_mis_cut_kings_V2.json", "w") as f:
     json.dump({
         "maxcut": binned_maxcut,
         "mis_cut": binned_mis_cut
