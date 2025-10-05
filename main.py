@@ -5,7 +5,7 @@ from quera_wrapper import QuEraWrapper
 import json
 
 
-def run(input_data):    
+def run(input_data, solver_params, extra_arguments):    
     ##### THIS IS HOW YOU READ INPUT DATA FROM JSON #####
     positions = input_data['positions']
     positions = scale_and_snap_positions(positions)
