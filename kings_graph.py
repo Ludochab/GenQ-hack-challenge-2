@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 import math
 import random as rng
 
+#files
+from OtherMaxCut import maxcut_goemans_williamson
+
 
 M = 14          # number of lines in the grid
 N = 14          # number of columns in the grid
@@ -131,3 +134,9 @@ if __name__ == "__main__":
     print(f"Sum of edge weights = {s}")
 
     draw_edge_weights(H, decimals=2)
+
+
+    val, x, (S, VS), meta = maxcut_goemans_williamson(G, R=128, rng=42)
+    print("Méthode:", meta["method"])
+    print("Coupe (S | V\\S):", S, "|", VS)
+    print("Valeur de la coupe:", val)

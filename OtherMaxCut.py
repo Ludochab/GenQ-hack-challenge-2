@@ -196,7 +196,7 @@ if __name__ == "__main__":
         [0.0, 0.0, 1.5, 0.0],
     ], dtype=float)
 
-    mtlMatrix = np.load("mtlFile.npy")
+    mtlMatrix = np.load("mtl_matrix.npy")
 
     #val, x, (S, VS), meta = maxcut_goemans_williamson(W, R=128, rng=42)
 
