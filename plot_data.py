@@ -19,3 +19,30 @@ plt.ylabel("Fraction of instances")
 plt.title("Normalized Distribution of MaxCut Sums")
 plt.tight_layout()
 plt.show()
+
+# Load data
+with open("maxcut_vs_mis_cut_kings.json") as f:
+    data = json.load(f)
+
+# Extract MaxCut data
+x_maxcut = [entry["discrete_value"] for entry in data["maxcut"]]
+y_counts_maxcut = [entry["count"] for entry in data["maxcut"]]
+total_maxcut = sum(y_counts_maxcut)
+y_maxcut = [count / total_maxcut for count in y_counts_maxcut]
+
+# Extract MIS-cut data
+x_mis = [entry["discrete_value"] for entry in data["mis_cut"]]
+y_counts_mis = [entry["count"] for entry in data["mis_cut"]]
+total_mis = sum(y_counts_mis)
+y_mis = [count / total_mis for count in y_counts_mis]
+
+# Plot both as lines
+plt.figure(figsize=(10, 5))
+plt.plot(x_maxcut, y_maxcut, color="blue", label="MaxCut (Goemans–Williamson)")
+plt.plot(x_mis, y_mis, color="orange", label="MIS-based Cut")
+plt.xlabel("MaxCut sum (discretized)")
+plt.ylabel("Fraction of instances")
+plt.title("Normalized Distribution: MaxCut vs MIS-based Cut")
+plt.legend()
+plt.tight_layout()
+plt.show()
