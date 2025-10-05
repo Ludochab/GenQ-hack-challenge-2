@@ -34,7 +34,7 @@ def run(input_data, solver_params, extra_arguments):
     ##############################################################################################################
     
     QuEraWrapper.program=program
-    results=QuEraWrapper.run(shots=100,interaction_picture=True)
+    results=QuEraWrapper.run(shots=100)
     counts=results.report().counts()
 
     ##############################################################################################################
