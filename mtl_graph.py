@@ -112,10 +112,10 @@ else:
 
 G_simplified = simplify_graph(G_merged)
 
-seed = 42
+seed = 2
 
 # Use spring layout for even node spacing
-spring_pos = nx.spring_layout(G_simplified, seed=seed)  # seed for reproducibility
+spring_pos = nx.kamada_kawai_layout(G_simplified)  # seed for reproducibility
 
 # Draw the spring layout graph
 plt.figure()
@@ -147,7 +147,7 @@ mtl_matrix = nx.to_numpy_array(G_simplified)
 # add random weights to the adjacencies edges
 mtl_matrix = mtl_matrix * np.random.uniform(0.5, 1.5, mtl_matrix.shape)
 
-np.save("mtl_matrix.npy", mtl_matrix)
+#np.save("mtl_matrix.npy", mtl_matrix)
 
 # Create a list of nodes in the order of positions
 node_list = list(G_simplified.nodes())
