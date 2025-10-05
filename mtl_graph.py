@@ -173,7 +173,7 @@ from OtherMaxCut import maxcut_goemans_williamson, maxcut_value_from_assignment
 
 # 1. MIS-based cut
 # Use the same node order as in node_list
-G_weighted = nx.from_numpy_array(mtl_matrix)
+G_mtl = nx.from_numpy_array(mtl_matrix)
 
 # Find all edges (upper triangle, since undirected)
 edges = np.transpose(np.triu_indices_from(mtl_matrix, k=1))
@@ -194,8 +194,8 @@ for (i, j), w in zip(edges, random_weights):
 mtl_matrix = (mtl_matrix_weighted + mtl_matrix_weighted.T) / 2
 
 mapping = {i: node for i, node in enumerate(node_list)}
-G_weighted = nx.relabel_nodes(G_weighted, mapping)
-mis_nodes = nx.algorithms.approximation.maximum_independent_set(G_weighted)
+G_mtl = nx.relabel_nodes(G_mtl, mapping)
+mis_nodes = nx.algorithms.approximation.maximum_independent_set(G_mtl)
 x_mis = np.array([1.0 if node in mis_nodes else -1.0 for node in node_list])
 val_mis_cut = maxcut_value_from_assignment(mtl_matrix, x_mis)
 
