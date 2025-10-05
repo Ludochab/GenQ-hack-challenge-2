@@ -2,7 +2,7 @@ import json
 import matplotlib.pyplot as plt
 
 # Load data
-with open("classical_kings.json") as f:
+with open("classical_kings_smol.json") as f:
     data = json.load(f)
 
 # Extract values and counts

@@ -26,11 +26,8 @@ def run(input_data, solver_params, extra_arguments):
 
     arrangement = start.add_position([tuple(pos) for pos in positions])
     
-    program = (
-    arrangement.rydberg
-    .rabi.amplitude.uniform.piecewise_linear(durations, rabi_amplitude_values)
-    .detuning.uniform.piecewise_linear(durations, rabi_detuning_values)
-    )
+    program = arrangement.rydberg.rabi.amplitude.uniform.piecewise_linear(durations, rabi_amplitude_values).detuning.uniform.piecewise_linear(durations, rabi_detuning_values)
+
 
     ##############################################################################################################
     ########################## ENTERING QCENTROID QUERA WRAPPER ##################################################
