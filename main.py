@@ -3,6 +3,7 @@ from bloqade.analog.atom_arrangement import AtomArrangement
 import numpy as np
 from quera_wrapper import QuEraWrapper
 import json
+from bloqade import start
 
 
 def run(input_data, solver_params, extra_arguments):    
@@ -23,8 +24,7 @@ def run(input_data, solver_params, extra_arguments):
     rabi_amplitude_values = [0.0, omega_max, omega_max, 0.0]
     rabi_detuning_values = [-delta_end, -delta_end, delta_end, delta_end]
 
-    
-    arrangement = AtomArrangement([tuple(pos) for pos in positions])
+    arrangement = start.add_position([tuple(pos) for pos in positions])
     
     program = (
     arrangement.rydberg
