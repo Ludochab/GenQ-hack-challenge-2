@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import math
 import random as rng
 
-M = 14          # number of lines in the grid
-N = 14          # number of columns in the grid
+M = 8          # number of lines in the grid
+N = 8         # number of columns in the grid
 MODE = "k"      # "k" to remove exactly K vertices; "p" for probability P
 k_min = max(1, math.ceil(0.25 * M * N))
 k_max = max(k_min, math.floor(0.50 * M * N))
@@ -44,18 +44,16 @@ def remove_random_nodes(G: nx.Graph, *, mode: str, k: int | None, p: float | Non
     H.remove_nodes_from(removed)
     return H
 
-def draw_king_graph(H: nx.Graph, title="Final graph"):
-    pos = {v: (v[1], -v[0]) for v in H.nodes()}
+def draw_king_graph(H: nx.Graph, title="Final graph", pos=None):
+    if pos is None:
+        pos = {v: (v[1], -v[0]) for v in H.nodes()}
     plt.figure(figsize=(6, 6))
-    nx.draw(
-        H, pos,
-        node_size=120, linewidths=0.5,
-        with_labels=False
-    )
+    nx.draw(H, pos, node_size=120, linewidths=0.5, with_labels=False)
     plt.gca().set_aspect('equal', adjustable='box')
     plt.title(title)
     plt.axis('off')
     plt.show()
+
 
 def add_random_edge_weights_sum(
     H: nx.Graph,
@@ -103,11 +101,11 @@ def add_random_edge_weights_sum(
     for (u, v), w in zip(edges, weights):
         H[u][v]["weight"] = w
 
-def draw_edge_weights(H: nx.Graph, decimals: int = 2):
+def draw_edge_weights(H: nx.Graph, decimals: int = 2, pos=None):
     if H.number_of_edges() == 0:
         raise ValueError("No edges to label.")
-    pos = {v: (v[1], -v[0]) for v in H.nodes()}
-    
+    if pos is None:
+        pos = {v: (v[1], -v[0]) for v in H.nodes()}
     plt.figure(figsize=(6, 6))
     nx.draw(H, pos, node_size=100, linewidths=0.5, with_labels=False)
     labels = {(u, v): f"{H[u][v]['weight']:.{decimals}f}" for u, v in H.edges()}
@@ -117,16 +115,29 @@ def draw_edge_weights(H: nx.Graph, decimals: int = 2):
     plt.axis('off')
     plt.show()
 
+def centered_pos_for_nodes(nodes, m: int, n: int, spacing: float = 5.0, center=(0.0, 0.0)):
+    cx = (n - 1) / 2.0
+    cy = (m - 1) / 2.0
+    ox, oy = center
+    return {
+        (i, j): (ox + spacing * (j - cx),
+                 oy + spacing * (cy - i))   
+        for (i, j) in nodes
+    }
+
+
 
 if __name__ == "__main__":
     G = king_graph(M, N)
     H = remove_random_nodes(G, mode=MODE, k=(K if MODE=="k" else None),
                                      p=(P if MODE=="p" else None), seed=SEED)
 
-    draw_king_graph(H, title=f"Final graph ({H.number_of_nodes()} vertices)")
+    pos = centered_pos_for_nodes(H.nodes(), M, N, spacing=5.0, center=(0.0, 0.0))
+
+    draw_king_graph(H, title=f"Final graph ({H.number_of_nodes()} vertices)", pos=pos)
 
     add_random_edge_weights_sum(H, total=100.0, seed=SEED, integer=False, decimals=3)
     s = sum(nx.get_edge_attributes(H, "weight").values())
     print(f"Sum of edge weights = {s}")
 
-    draw_edge_weights(H, decimals=2)
+    draw_edge_weights(H, decimals=2, pos=pos)
