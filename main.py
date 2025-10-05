@@ -4,10 +4,9 @@ from quera_wrapper import QuEraWrapper
 import json
 def run(input_data, solver_params, extra_arguments):
     
-    ##### THIW IS HOW YOU READ INPUT DATA FROM JSON #####
-    
-    #data = input_data['adj_matrix'] # dummy example
-    #data
+    ##### THIS IS HOW YOU READ INPUT DATA FROM JSON #####
+    positions = input_data['positions']
+    indices = input_data.get('indices', list(range(len(positions))))
     #######################################################
 
     
@@ -41,12 +40,20 @@ def run(input_data, solver_params, extra_arguments):
     
     QuEraWrapper.program=prog_list[1]
     x=QuEraWrapper.run(shots=1000)
-
-    ##############################################################################################################
-    ##############################################################################################################
-    ##############################################################################################################
-    
-    
     r=x.report()
 
-    return {'res':json.dumps(r.counts())}
+    ##############################################################################################################
+    ##############################################################################################################
+    ##############################################################################################################
+    
+    # Ensure counts are returned as {bitstring: count} with bitstrings in the order of indices
+    counts = r.counts()
+    # If needed, sort bitstrings by indices (usually not needed if QuEra returns in order)
+    # But you can ensure the order by:
+    ordered_counts = {}
+    for bitstring, count in counts.items():
+        # bitstring is already in the order of indices
+        ordered_counts[bitstring] = count
+    
+
+    return ordered_counts

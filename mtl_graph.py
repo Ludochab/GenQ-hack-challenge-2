@@ -6,7 +6,7 @@ from sklearn.cluster import DBSCAN
 import numpy as np
 import folium
 import random
-
+import json
 
 gdf = gpd.read_file("data/CARTO_SER_ELE_TEL_AERIEN.shp")
 print(gdf.head())
@@ -142,8 +142,24 @@ m.save("map.html")
 
 
 
-mtlMatrix = nx.to_numpy_array(G_simplified)
+mtl_matrix = nx.to_numpy_array(G_simplified)
 
+# add random weights to the adjacencies edges
+mtl_matrix = mtl_matrix * np.random.uniform(0.5, 1.5, mtl_matrix.shape)
 
-np.save("mtlFile.npy", mtlMatrix)
+np.save("mtl_matrix.npy", mtl_matrix)
 
+# Create a list of nodes in the order of positions
+node_list = list(G_simplified.nodes())
+positions = [list(map(float, spring_pos[n])) for n in node_list]
+
+# Prepare the data dictionary with indices
+data = {
+    "indices": list(range(len(node_list))),
+    "nodes": [str(n) for n in node_list],  # or just node_list if they are serializable
+    "positions": positions
+}
+
+# Save to JSON
+with open("input.json", "w") as f:
+    json.dump(data, f)
