@@ -3,6 +3,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import math
 import random as rng
+import json
 
 #files
 from OtherMaxCut import maxcut_goemans_williamson
@@ -11,8 +12,8 @@ from OtherMaxCut import maxcut_goemans_williamson
 M = 14          # number of lines in the grid
 N = 14          # number of columns in the grid
 MODE = "k"      # "k" to remove exactly K vertices; "p" for probability P
-k_min = max(1, math.ceil(0.25 * M * N))
-k_max = max(k_min, math.floor(0.50 * M * N))
+k_min = max(1, math.ceil(0.05 * M * N))
+k_max = max(k_min, math.floor(0.15 * M * N))
 K = rng.randint(k_min, k_max)
 P = 0.15        # used if MODE == "p" (must be in [0,1])
 SEED = None       # integer for reproducibility; set to None for pure randomness
@@ -132,22 +133,39 @@ def centered_pos_for_nodes(nodes, m: int, n: int, spacing: float = 5.0, center=(
 
 
 if __name__ == "__main__":
-    G = king_graph(M, N)
-    H = remove_random_nodes(G, mode=MODE, k=(K if MODE=="k" else None),
-                                     p=(P if MODE=="p" else None), seed=SEED)
+    # G = king_graph(M, N)
+    # H = remove_random_nodes(G, mode=MODE, k=(K if MODE=="k" else None),
+    #                                  p=(P if MODE=="p" else None), seed=SEED)
 
-    pos = centered_pos_for_nodes(H.nodes(), M, N, spacing=5.0, center=(0.0, 0.0))
+    # pos = centered_pos_for_nodes(H.nodes(), M, N, spacing=5.0, center=(0.0, 0.0))
 
-    draw_king_graph(H, title=f"Final graph ({H.number_of_nodes()} vertices)", pos=pos)
+    # draw_king_graph(H, title=f"Final graph ({H.number_of_nodes()} vertices)", pos=pos)
 
-    add_random_edge_weights_sum(H, total=100.0, seed=SEED, integer=False, decimals=3)
-    s = sum(nx.get_edge_attributes(H, "weight").values())
-    print(f"Sum of edge weights = {s}")
+    # add_random_edge_weights_sum(H, total=100.0, seed=SEED, integer=False, decimals=3)
+    # s = sum(nx.get_edge_attributes(H, "weight").values())
+    # print(f"Sum of edge weights = {s}")
 
-    draw_edge_weights(H, decimals=2)
+    # draw_edge_weights(H, decimals=2)
 
 
-    val, x, (S, VS), meta = maxcut_goemans_williamson(G, R=128, rng=42)
-    print("Méthode:", meta["method"])
-    print("Coupe (S | V\\S):", S, "|", VS)
-    print("Valeur de la coupe:", val)
+    # val, x, (S, VS), meta = maxcut_goemans_williamson(G, R=128, rng=42)
+    # print("Méthode:", meta["method"])
+    # print("Coupe (S | V\\S):", S, "|", VS)
+    # print("Valeur de la coupe:", val)
+
+    n_samples = 100
+    all_instances = {}
+
+    for instance_id in range(n_samples):
+        K = random.randint(k_min, k_max)
+        G = king_graph(M, N)
+        H = remove_random_nodes(G, mode=MODE, k=K, p=None, seed=None)
+        pos = centered_pos_for_nodes(H.nodes(), M, N, spacing=5.0, center=(0.0, 0.0))
+        node_list = list(H.nodes())
+        positions = [list(map(float, pos[n])) for n in node_list]
+        all_instances[str(instance_id)] = {
+            "positions": positions
+        }
+
+    with open("kings_graph_positions.json", "w") as f:
+        json.dump(all_instances, f, indent=2)

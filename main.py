@@ -7,48 +7,78 @@ from bloqade.analog import start
 
 
 def run(input_data, solver_params, extra_arguments):    
-    ##### THIS IS HOW YOU READ INPUT DATA FROM JSON #####
-    positions = input_data['positions']
-    positions = scale_and_snap_positions(positions)
-    indices = input_data.get('indices', list(range(len(positions))))
-    #######################################################
+    if extra_arguments["data"] == "mtl":
+        ##### THIS IS HOW YOU READ INPUT DATA FROM JSON #####
+        positions = input_data['positions']
+        positions = scale_and_snap_positions(positions)
+        indices = input_data.get('indices', list(range(len(positions))))
+        #######################################################
+        
+        
+        # Change the lattice spacing to vary the atom separation a, and thus also Rb/a
+        delta_end=2*np.pi*6.8 #final detuning
+        omega_max=2*np.pi*2.5 #max Rabi amplitude
+        C6 = 2*np.pi * 862690;
+        Rb = (C6 / (omega_max) )** (1/6) # R_B during bulk of protocol
 
-    
-    # Change the lattice spacing to vary the atom separation a, and thus also Rb/a
-    delta_end=2*np.pi*6.8 #final detuning
-    omega_max=2*np.pi*2.5 #max Rabi amplitude
-    C6 = 2*np.pi * 862690;
-    Rb = (C6 / (omega_max) )** (1/6) # R_B during bulk of protocol
+        durations = [0.8, 2.4, 0.8]  # total sweep time = 4.0 μs
+        rabi_amplitude_values = [0.0, omega_max, omega_max, 0.0]
+        rabi_detuning_values = [-delta_end, -delta_end, delta_end, delta_end]
 
-    durations = [0.8, 2.4, 0.8]  # total sweep time = 4.0 μs
-    rabi_amplitude_values = [0.0, omega_max, omega_max, 0.0]
-    rabi_detuning_values = [-delta_end, -delta_end, delta_end, delta_end]
-
-    arrangement = start.add_position([tuple(pos) for pos in positions])
-    
-    program = arrangement.rydberg.rabi.amplitude.uniform.piecewise_linear(durations, rabi_amplitude_values).detuning.uniform.piecewise_linear(durations, rabi_detuning_values)
+        arrangement = start.add_position([tuple(pos) for pos in positions])
+        
+        program = arrangement.rydberg.rabi.amplitude.uniform.piecewise_linear(durations, rabi_amplitude_values).detuning.uniform.piecewise_linear(durations, rabi_detuning_values)
 
 
-    ##############################################################################################################
-    ########################## ENTERING QCENTROID QUERA WRAPPER ##################################################
-    ##############################################################################################################
-    
-    QuEraWrapper.program=program
-    results=QuEraWrapper.run(shots=100)
-    counts=results.report().counts()
+        ##############################################################################################################
+        ########################## ENTERING QCENTROID QUERA WRAPPER ##################################################
+        ##############################################################################################################
+        
+        QuEraWrapper.program=program
+        results=QuEraWrapper.run(shots=100)
+        counts=results.report().counts()
 
-    ##############################################################################################################
-    ##############################################################################################################
-    ##############################################################################################################
+        ##############################################################################################################
+        ##############################################################################################################
+        ##############################################################################################################
 
-    # If needed, sort bitstrings by indices (usually not needed if QuEra returns in order)
-    # But you can ensure the order by:
-    ordered_counts = {}
-    for bitstring, count in counts.items():
-        # bitstring is already in the order of indices
-        ordered_counts[bitstring] = count
-    
-    return ordered_counts
+        # If needed, sort bitstrings by indices (usually not needed if QuEra returns in order)
+        # But you can ensure the order by:
+        ordered_counts = {}
+        for bitstring, count in counts.items():
+            # bitstring is already in the order of indices
+            ordered_counts[bitstring] = count
+        return ordered_counts
+    elif extra_arguments["data"] == "kings":
+        # input_data: {instance_id: {"positions": [[x, y], ...]}, ...}
+        all_results = {}
+        for instance_id, instance in input_data.items():
+            positions = instance["positions"]
+            positions = scale_and_snap_positions(positions)
+            delta_end = 2 * np.pi * 6.8
+            omega_max = 2 * np.pi * 2.5
+            C6 = 2 * np.pi * 862690
+            Rb = (C6 / omega_max) ** (1 / 6)
+
+            durations = [0.8, 2.4, 0.8]
+            rabi_amplitude_values = [0.0, omega_max, omega_max, 0.0]
+            rabi_detuning_values = [-delta_end, -delta_end, delta_end, delta_end]
+
+            arrangement = start.add_position([tuple(pos) for pos in positions])
+            program = arrangement.rydberg.rabi.amplitude.uniform.piecewise_linear(
+                durations, rabi_amplitude_values
+            ).detuning.uniform.piecewise_linear(durations, rabi_detuning_values)
+
+            QuEraWrapper.program = program
+            results = QuEraWrapper.run(shots=10)
+            counts = results.report().counts()
+
+            # Store results for this instance
+            ordered_counts = {}
+            for bitstring, count in counts.items():
+                ordered_counts[bitstring] = count
+            all_results[instance_id] = ordered_counts
+        return all_results
 
 
 def scale_and_snap_positions(positions, min_dist=4, max_abs=37.5):
