@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import math
 import random as rng
 
+
 M = 14          # number of lines in the grid
 N = 14          # number of columns in the grid
 MODE = "k"      # "k" to remove exactly K vertices; "p" for probability P
