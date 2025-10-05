@@ -3,7 +3,7 @@ from bloqade.analog.atom_arrangement import AtomArrangement
 import numpy as np
 from quera_wrapper import QuEraWrapper
 import json
-from bloqade import start
+from bloqade.analog import start
 
 
 def run(input_data, solver_params, extra_arguments):    
