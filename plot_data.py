@@ -14,9 +14,9 @@ y = [count / total for count in y_counts]
 # Plot as a line
 plt.figure(figsize=(10, 5))
 plt.plot(x, y, color="blue")
-plt.xlabel("MaxCut sum (discretized)")
-plt.ylabel("Fraction of instances")
-plt.title("Normalized Distribution of MaxCut Sums")
+plt.xlabel("Cut edges weight sum")
+plt.ylabel("Probability density")
+plt.title("Distribution of MaxCut Sums for Classical Kings Graphs")
 plt.tight_layout()
 plt.show()
 
@@ -40,8 +40,29 @@ y_mis = [count / total_mis for count in y_counts_mis]
 plt.figure(figsize=(10, 5))
 plt.plot(x_maxcut, y_maxcut, color="blue", label="MaxCut (Goemans–Williamson)")
 plt.plot(x_mis, y_mis, color="orange", label="MIS-based Cut")
-plt.xlabel("MaxCut sum (discretized)")
-plt.ylabel("Fraction of instances")
+plt.xlabel("Cut edges weight sum")
+plt.ylabel("Probability density")
+plt.title("Normalized Distribution: MaxCut vs MIS-based Cut")
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+# Load MTL graph results
+with open("mtl_maxcut_vs_mis_cut.json") as f:
+    mtl_data = json.load(f)
+mtl_maxcut = mtl_data["maxcut_value"]
+mtl_mis_cut = mtl_data["mis_cut_value"]
+
+# Plot both as lines
+plt.figure(figsize=(10, 5))
+plt.plot(x_maxcut, y_maxcut, color="blue", label="MaxCut (Goemans–Williamson)")
+plt.plot(x_mis, y_mis, color="orange", label="MIS-based Cut")
+
+# Add vertical lines for MTL graph
+plt.axvline(mtl_maxcut, color="blue", linestyle="--", label="MTL MaxCut")
+plt.axvline(mtl_mis_cut, color="orange", linestyle="--", label="MTL MIS-based Cut")
+plt.xlabel("Cut edges weight sum")
+plt.ylabel("Probability density")
 plt.title("Normalized Distribution: MaxCut vs MIS-based Cut")
 plt.legend()
 plt.tight_layout()

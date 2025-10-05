@@ -163,3 +163,49 @@ data = {
 # Save to JSON
 with open("input.json", "w") as f:
     json.dump(data, f)
+
+import json
+import networkx as nx
+import numpy as np
+from OtherMaxCut import maxcut_goemans_williamson, maxcut_value_from_assignment
+
+# Compute MaxCut and MIS-based cut for the MTL graph
+
+# 1. MIS-based cut
+# Use the same node order as in node_list
+G_weighted = nx.from_numpy_array(mtl_matrix)
+
+# Find all edges (upper triangle, since undirected)
+edges = np.transpose(np.triu_indices_from(mtl_matrix, k=1))
+num_edges = int(mtl_matrix.sum() // 2)  # or just len(edges)
+
+# Generate random positive weights
+random_weights = np.random.rand(len(edges))
+random_weights = 100 * random_weights / random_weights.sum()  # Normalize to sum to 100
+
+# Assign weights to the adjacency matrix
+mtl_matrix_weighted = np.zeros_like(mtl_matrix)
+for (i, j), w in zip(edges, random_weights):
+    if mtl_matrix[i, j] > 0:
+        mtl_matrix_weighted[i, j] = w
+        mtl_matrix_weighted[j, i] = w  # Symmetric
+
+# After assigning weights to mtl_matrix_weighted
+mtl_matrix = (mtl_matrix_weighted + mtl_matrix_weighted.T) / 2
+
+mapping = {i: node for i, node in enumerate(node_list)}
+G_weighted = nx.relabel_nodes(G_weighted, mapping)
+mis_nodes = nx.algorithms.approximation.maximum_independent_set(G_weighted)
+x_mis = np.array([1.0 if node in mis_nodes else -1.0 for node in node_list])
+val_mis_cut = maxcut_value_from_assignment(mtl_matrix, x_mis)
+
+# 2. MaxCut (Goemans–Williamson)
+val_maxcut, x_maxcut, (S, VS), meta = maxcut_goemans_williamson(mtl_matrix, R=64, rng=None, verbose=False)
+
+# Save results to JSON
+result = {
+    "maxcut_value": float(val_maxcut),
+    "mis_cut_value": float(val_mis_cut)
+}
+with open("mtl_maxcut_vs_mis_cut.json", "w") as f:
+    json.dump(result, f, indent=2)
