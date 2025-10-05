@@ -24,7 +24,7 @@ def run(input_data, solver_params, extra_arguments):
     rabi_detuning_values = [-delta_end, -delta_end, delta_end, delta_end]
 
     
-    arrangement = AtomArrangement(positions)
+    arrangement = AtomArrangement([tuple(pos) for pos in positions])
     
     program = (
     arrangement.rydberg
